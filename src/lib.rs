@@ -291,8 +291,9 @@ where
             })
         .map_err(|e| {
             match e {
-                Err::Error((s, e)) => ParseError::from_error_kind(predicate, e),
-                Err::Incomplete(needed) => Err::Incomplete(needed)
+                Err::Error((s, e)) => Err::Error(E::from_error_kind(self.clone(), e)),
+                Err::Incomplete(needed) => Err::Incomplete(needed),
+                _ => panic!("unhandled error")
             }
         })
     }
@@ -306,6 +307,13 @@ where
                 let split = o.input_len();
                 (self.slice(split..), self.slice(..split))
             })
+        .map_err(|e| {
+            match e {
+                Err::Error((s, e)) => Err::Error(E::from_error_kind(self.clone(), e)),
+                Err::Incomplete(needed) => Err::Incomplete(needed),
+                _ => panic!("unhandled error")
+            }
+        })
     }
 
     fn split_at_position_complete<P, E: ParseError<Self>>(&self, predicate: P) -> IResult<Self, Self, E>
